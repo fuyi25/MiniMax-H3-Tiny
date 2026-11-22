@@ -14,8 +14,10 @@ a shared ``--rank``-dim basis of that curve, sampled on ``--grid`` points (``ada
 the AdaLN outputs match the diffusers model to ~1e-10 relative error; the time embedder is then not needed.
 ``--adaln full`` instead writes dense ``[96768, 2688]`` projections plus the time embedder (about 0.5 GB more per block).
 
-Not supported: checkpoints with an interval branch (``r_time_embedder``, the FewStep students), which ComfyUI's
-MiniMax H3 model has no input for. A token refiner wider than the pruned block FFN (the 14B keeps 14336 against 9792)
+Few-step students carry an interval branch (``r_time_embedder``): AdaLN then depends on both t and the step endpoint
+r, so it cannot be tabulated over t. Those convert with ``--adaln lowrank`` (chosen automatically): the time embedders
+and the rank-8 AdaLN factors are kept as they are, and the file loads with the "H3-Tiny Few-Step Loader" node from
+``comfyui/`` in this repository instead of the stock loader. A token refiner wider than the pruned block FFN (the 14B keeps 14336 against 9792)
 loads as is: ComfyUI assigns the stored tensors, and we checked that its output matches a build at the true widths.
 """
 
@@ -123,8 +125,10 @@ def adaln_low_rank(src: Source, prefix: str, basis: torch.Tensor, mean: torch.Te
 
 def convert(src: Source, adaln: str = "curve", rank: int = 16, grid: int = 1025, log=print) -> dict[str, torch.Tensor]:
     keys = set(src.keys())
-    if any(k.startswith("r_time_embedder.") for k in keys):
-        raise SystemExit("checkpoint has an interval branch (r_time_embedder): ComfyUI's MiniMax H3 model cannot run it")
+    fewstep = any(k.startswith("r_time_embedder.") for k in keys)
+    if fewstep and adaln != "lowrank":
+        log("interval branch (r_time_embedder) found: writing the low-rank layout for the H3-Tiny few-step loader")
+        adaln = "lowrank"
     out: dict[str, torch.Tensor] = {}
     done: set[str] = set()
 
@@ -140,7 +144,12 @@ def convert(src: Source, adaln: str = "curve", rank: int = 16, grid: int = 1025,
         curve = (basis, mean)
 
     def put_adaln(src_prefix: str, dst_prefix: str):
-        if curve is not None:
+        if adaln == "lowrank" and f"{src_prefix}.linear_1.weight" in src:
+            base = dst_prefix.rsplit(".", 1)[0]  # ...adaln_proj
+            for lin in ("linear_1", "linear_2"):
+                for suffix in ("weight", "bias"):
+                    out[f"{base}.{lin}.{suffix}"] = src[f"{src_prefix}.{lin}.{suffix}"]
+        elif curve is not None:
             w, b = adaln_low_rank(src, src_prefix, *curve)
             out[f"{dst_prefix}.weight"], out[f"{dst_prefix}.bias"] = w.float().contiguous(), b.float().contiguous()
         else:
@@ -161,6 +170,11 @@ def convert(src: Source, adaln: str = "curve", rank: int = 16, grid: int = 1025,
             if k in keys:
                 out[f"{dst}.{suffix}"] = src[k]
                 done.add(k)
+    if fewstep:
+        for lin, dst in (("linear_1", "proj_in"), ("linear_2", "proj_out")):
+            for suffix in ("weight", "bias"):
+                out[f"r_time_embedder.{dst}.{suffix}"] = src[f"r_time_embedder.{lin}.{suffix}"]
+                done.add(f"r_time_embedder.{lin}.{suffix}")
 
     blocks: dict[tuple[str, int], set[str]] = {}
     for k in keys:
@@ -201,7 +215,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--src", required=True, help="diffusers transformer directory (config.json + safetensors)")
     ap.add_argument("--out", required=True, help="output .safetensors path")
-    ap.add_argument("--adaln", choices=["curve", "full"], default="curve")
+    ap.add_argument("--adaln", choices=["curve", "full", "lowrank"], default="curve",
+                    help="AdaLN layout; checkpoints with an interval branch always use lowrank")
     ap.add_argument("--rank", type=int, default=16, help="curve basis size (curve form)")
     ap.add_argument("--grid", type=int, default=1025, help="t grid points of adaln_t_table (curve form)")
     args = ap.parse_args()
@@ -209,7 +224,9 @@ def main():
     src = Source(Path(args.src))
     state = convert(src, args.adaln, args.rank, args.grid)
     params = sum(t.numel() for k, t in state.items() if k not in ("adaln_t_table", "rope.inv_freq"))
-    meta = {"h3tiny": json.dumps({"format": 1, "source": Path(args.src).name, "adaln": args.adaln,
+    fewstep = "r_time_embedder.proj_in.weight" in state
+    meta = {"h3tiny": json.dumps({"format": 1, "source": Path(args.src).name,
+                                   "adaln": "lowrank" if fewstep else args.adaln, "fewstep": fewstep,
                                    "params": params})}
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     save_file(state, args.out, metadata=meta)
