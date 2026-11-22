@@ -138,7 +138,7 @@ class H3TinyFewStepLoader:
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "load"
     CATEGORY = "loaders/H3-Tiny"
-    DESCRIPTION = "Load an H3-Tiny few-step checkpoint (h3_tiny_*_fewstep_*.safetensors)."
+    DESCRIPTION = "Load an H3-Tiny few-step checkpoint (minimax_h3_tiny_*_fewstep_*.safetensors)."
 
     def load(self, unet_name):
         return (load_few_step(folder_paths.get_full_path_or_raise("diffusion_models", unet_name)),)

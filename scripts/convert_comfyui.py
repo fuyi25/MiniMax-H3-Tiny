@@ -1,7 +1,7 @@
 """Convert an H3-Tiny (or official MiniMax-H3) diffusers transformer to a single ComfyUI checkpoint.
 
-    python scripts/convert_comfyui.py --src /models/H3-Tiny-17B-Pruned-Ref2VA \\
-        --out /models/comfyui/h3_tiny_17b_ref2va_bf16.safetensors
+    python scripts/convert_comfyui.py --src /models/MiniMax-H3-Tiny-17B-Pruned-Ref2VA \\
+        --out /models/comfyui/minimax_h3_tiny_17b_ref2va_bf16.safetensors
 
 The output loads with ComfyUI's stock "Load Diffusion Model" node and the native MiniMax H3 workflows: put it in
 ``ComfyUI/models/diffusion_models/``. ComfyUI reads the architecture from the tensors (block count, FFN width), so a

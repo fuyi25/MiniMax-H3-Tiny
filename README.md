@@ -22,24 +22,26 @@ and few-step checkpoints.
 
 ## News
 
+- **[2026/11/22]** The checkpoints are renamed to `MiniMax-H3-Tiny-*` on Hugging Face (old links redirect), and the
+  ComfyUI files to `minimax_h3_tiny_*.safetensors`.
 - **[2026/11/21]** ComfyUI support: single-file checkpoints in
-  [`H3-Tiny-ComfyUI`](https://huggingface.co/H3-Tiny/H3-Tiny-ComfyUI) load with ComfyUI's native MiniMax H3 nodes
+  [`MiniMax-H3-Tiny-ComfyUI`](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-ComfyUI) load with ComfyUI's native MiniMax H3 nodes
   (17B Ref2VA, 17B FL2VA / T2VA, 14B OKD Ref2VA, and 17B FewStep with our nodes). See [ComfyUI](#comfyui).
-- **[2026/11/20]** We release [`H3-Tiny-17B-Pruned-FL2VA`](https://huggingface.co/H3-Tiny/H3-Tiny-17B-Pruned-FL2VA),
+- **[2026/11/20]** We release [`MiniMax-H3-Tiny-17B-Pruned-FL2VA`](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-17B-Pruned-FL2VA),
   the H3 FL2VA / T2VA transformer pruned to 17B with no training.
 - **[2026/11/19]** We release the pruning and inference code and the [project page](https://fuyi25.github.io/H3-Tiny/).
-- **[2026/11/19]** We release three checkpoints on [Hugging Face](https://huggingface.co/H3-Tiny): `H3-Tiny-17B-Pruned-Ref2VA`,
-  `H3-Tiny-17B-FewStep-Ref2VA-v0.1` and `H3-Tiny-14B-OKD-Ref2VA-v0.1`.
+- **[2026/11/19]** We release three checkpoints on [Hugging Face](https://huggingface.co/H3-Tiny): `MiniMax-H3-Tiny-17B-Pruned-Ref2VA`,
+  `MiniMax-H3-Tiny-17B-FewStep-Ref2VA-v0.1` and `MiniMax-H3-Tiny-14B-OKD-Ref2VA-v0.1`.
 
 ## Checkpoints
 
 | Checkpoint | Parameters | Made by | Sampling | Released |
 |---|---|---|---|:---:|
-| [`H3-Tiny-17B-Pruned-Ref2VA`](https://huggingface.co/H3-Tiny/H3-Tiny-17B-Pruned-Ref2VA) | 17.1B | AdaLN rank 8 + 8 of 50 blocks removed, **no training** | 50 steps | ✅ |
-| [`H3-Tiny-17B-Pruned-FL2VA`](https://huggingface.co/H3-Tiny/H3-Tiny-17B-Pruned-FL2VA) | 17.1B | Same recipe on the FL2VA / T2VA transformer (same 8 blocks removed), **no training** | 50 steps | ✅ |
-| [`H3-Tiny-17B-FewStep-Ref2VA-v0.1`](https://huggingface.co/H3-Tiny/H3-Tiny-17B-FewStep-Ref2VA-v0.1) | 17.1B | 17B, few-step distillation | **6 steps** by default (4 or more) | ✅ |
-| [`H3-Tiny-14B-OKD-Ref2VA-v0.1`](https://huggingface.co/H3-Tiny/H3-Tiny-14B-OKD-Ref2VA-v0.1) | 14.0B | 17B with FFNs narrowed to 9792 channels, recovered by OKD (distillation from the 33B teacher) | 50 steps | ✅ |
-| `H3-Tiny-14B-FewStep-Ref2VA` | 14.0B | 14B OKD, then few-step distillation | **6 steps** by default (4 or more) | coming soon |
+| [`MiniMax-H3-Tiny-17B-Pruned-Ref2VA`](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-17B-Pruned-Ref2VA) | 17.1B | AdaLN rank 8 + 8 of 50 blocks removed, **no training** | 50 steps | ✅ |
+| [`MiniMax-H3-Tiny-17B-Pruned-FL2VA`](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-17B-Pruned-FL2VA) | 17.1B | Same recipe on the FL2VA / T2VA transformer (same 8 blocks removed), **no training** | 50 steps | ✅ |
+| [`MiniMax-H3-Tiny-17B-FewStep-Ref2VA-v0.1`](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-17B-FewStep-Ref2VA-v0.1) | 17.1B | 17B, few-step distillation | **6 steps** by default (4 or more) | ✅ |
+| [`MiniMax-H3-Tiny-14B-OKD-Ref2VA-v0.1`](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-14B-OKD-Ref2VA-v0.1) | 14.0B | 17B with FFNs narrowed to 9792 channels, recovered by OKD (distillation from the 33B teacher) | 50 steps | ✅ |
+| `MiniMax-H3-Tiny-14B-FewStep-Ref2VA` | 14.0B | 14B OKD, then few-step distillation | **6 steps** by default (4 or more) | coming soon |
 
 **The 17B works well straight out of pruning, with no training at all!**
 
@@ -78,7 +80,7 @@ the 33B transformer, to prune it yourself).
 ## Inference
 
 ```bash
-python scripts/infer.py --weights ckpt/H3-Tiny-17B-FewStep-Ref2VA-v0.1 --base-model /models/MiniMax-H3 \
+python scripts/infer.py --weights ckpt/MiniMax-H3-Tiny-17B-FewStep-Ref2VA-v0.1 --base-model /models/MiniMax-H3 \
     --prompt "<Picture 1> ..." --references ref1.png --num-frames 124 --out outputs/
 ```
 
@@ -90,15 +92,15 @@ otherwise; force one with `--attention fa3` or `--attention sdpa`. From Python:
 
 ```python
 from h3tiny.pipeline import load_pipeline
-pipe = load_pipeline("ckpt/H3-Tiny-17B-FewStep-Ref2VA-v0.1", "/models/MiniMax-H3", device="cuda")
+pipe = load_pipeline("ckpt/MiniMax-H3-Tiny-17B-FewStep-Ref2VA-v0.1", "/models/MiniMax-H3", device="cuda")
 ```
 
-For FL2VA (first + last frame) and T2VA (text only), use `H3-Tiny-17B-Pruned-FL2VA` with `--workflow`:
+For FL2VA (first + last frame) and T2VA (text only), use `MiniMax-H3-Tiny-17B-Pruned-FL2VA` with `--workflow`:
 
 ```bash
-python scripts/infer.py --weights ckpt/H3-Tiny-17B-Pruned-FL2VA --base-model /models/MiniMax-H3 --workflow fl2va \
+python scripts/infer.py --weights ckpt/MiniMax-H3-Tiny-17B-Pruned-FL2VA --base-model /models/MiniMax-H3 --workflow fl2va \
     --image first.png --last-image last.png --prompt "For the target video, at 0.00 seconds ..." --num-frames 124 --out outputs/
-python scripts/infer.py --weights ckpt/H3-Tiny-17B-Pruned-FL2VA --base-model /models/MiniMax-H3 --workflow t2va \
+python scripts/infer.py --weights ckpt/MiniMax-H3-Tiny-17B-Pruned-FL2VA --base-model /models/MiniMax-H3 --workflow t2va \
     --prompt "integrated_multimodal_description: ..." --num-frames 124 --out outputs/
 ```
 
@@ -107,15 +109,15 @@ The pipeline is the official diffusers MiniMax H3 workflow with the H3-Tiny tran
 
 ## ComfyUI
 
-[`H3-Tiny-ComfyUI`](https://huggingface.co/H3-Tiny/H3-Tiny-ComfyUI) holds the checkpoints as single files for
+[`MiniMax-H3-Tiny-ComfyUI`](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-ComfyUI) holds the checkpoints as single files for
 ComfyUI's native MiniMax H3 support:
 
 | File | Workflow node |
 |---|---|
-| `h3_tiny_17b_ref2va_bf16.safetensors` | MiniMax H3 Reference to Video |
-| `h3_tiny_17b_fl2va_bf16.safetensors` | MiniMax H3 Image to Video (FL2VA with first / last frames, T2VA without) |
-| `h3_tiny_14b_okd_ref2va_bf16.safetensors` | MiniMax H3 Reference to Video |
-| `h3_tiny_17b_fewstep_ref2va_bf16.safetensors` | MiniMax H3 Reference to Video, with the H3-Tiny nodes below |
+| `minimax_h3_tiny_17b_ref2va_bf16.safetensors` | MiniMax H3 Reference to Video |
+| `minimax_h3_tiny_17b_fl2va_bf16.safetensors` | MiniMax H3 Image to Video (FL2VA with first / last frames, T2VA without) |
+| `minimax_h3_tiny_14b_okd_ref2va_bf16.safetensors` | MiniMax H3 Reference to Video |
+| `minimax_h3_tiny_17b_fewstep_ref2va_bf16.safetensors` | MiniMax H3 Reference to Video, with the H3-Tiny nodes below |
 
 Put the file in `ComfyUI/models/diffusion_models/`, take the text encoder and VAEs from
 [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3), and select the file in **Load Diffusion Model**.
@@ -134,7 +136,7 @@ and `BasicGuider`.
 To convert a diffusers checkpoint yourself:
 
 ```bash
-python scripts/convert_comfyui.py --src ckpt/H3-Tiny-17B-Pruned-Ref2VA --out h3_tiny_17b_ref2va_bf16.safetensors
+python scripts/convert_comfyui.py --src ckpt/MiniMax-H3-Tiny-17B-Pruned-Ref2VA --out minimax_h3_tiny_17b_ref2va_bf16.safetensors
 ```
 
 ## Pruning
