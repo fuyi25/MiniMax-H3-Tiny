@@ -6,6 +6,7 @@
 
 [![Project page](https://img.shields.io/badge/Project-Page-1f6feb)](https://fuyi25.github.io/MiniMax-H3-Tiny/)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-ffcc4d)](https://huggingface.co/H3-Tiny)
+[![ComfyUI](https://img.shields.io/badge/ComfyUI-Single--file%20weights-f0883e)](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-ComfyUI)
 ![arXiv](https://img.shields.io/badge/arXiv-coming%20soon-b31b1b)
 [![Code license](https://img.shields.io/badge/Code-Apache%202.0-555)](LICENSE)
 
@@ -17,6 +18,9 @@
 
 Joint video + audio generation from text and reference images, at about half the size of the original, with recovered
 and few-step checkpoints.
+
+🧩 **Using ComfyUI?** Every checkpoint also comes as a single file in
+[MiniMax-H3-Tiny-ComfyUI](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-ComfyUI); see [ComfyUI](#comfyui).
 
 <p align="center"><img src="assets/blocks.png" width="100%" alt="Block influence per block for video and audio tokens; blocks removed in the 17B"></p>
 
