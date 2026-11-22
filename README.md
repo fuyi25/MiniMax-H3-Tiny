@@ -4,7 +4,7 @@
 
 **Structured pruning of MiniMax H3 Ref2VA: 33B → 17B → 14B**
 
-[![Project page](https://img.shields.io/badge/Project-Page-1f6feb)](https://fuyi25.github.io/H3-Tiny/)
+[![Project page](https://img.shields.io/badge/Project-Page-1f6feb)](https://fuyi25.github.io/MiniMax-H3-Tiny/)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-ffcc4d)](https://huggingface.co/H3-Tiny)
 ![arXiv](https://img.shields.io/badge/arXiv-coming%20soon-b31b1b)
 [![Code license](https://img.shields.io/badge/Code-Apache%202.0-555)](LICENSE)
@@ -29,7 +29,7 @@ and few-step checkpoints.
   (17B Ref2VA, 17B FL2VA / T2VA, 14B OKD Ref2VA, and 17B FewStep with our nodes). See [ComfyUI](#comfyui).
 - **[2026/11/20]** We release [`MiniMax-H3-Tiny-17B-Pruned-FL2VA`](https://huggingface.co/H3-Tiny/MiniMax-H3-Tiny-17B-Pruned-FL2VA),
   the H3 FL2VA / T2VA transformer pruned to 17B with no training.
-- **[2026/11/19]** We release the pruning and inference code and the [project page](https://fuyi25.github.io/H3-Tiny/).
+- **[2026/11/19]** We release the pruning and inference code and the [project page](https://fuyi25.github.io/MiniMax-H3-Tiny/).
 - **[2026/11/19]** We release three checkpoints on [Hugging Face](https://huggingface.co/H3-Tiny): `MiniMax-H3-Tiny-17B-Pruned-Ref2VA`,
   `MiniMax-H3-Tiny-17B-FewStep-Ref2VA-v0.1` and `MiniMax-H3-Tiny-14B-OKD-Ref2VA-v0.1`.
 
@@ -126,7 +126,7 @@ Sample with 50 steps, the `simple` scheduler and no CFG (`BasicGuider`), without
 The few-step checkpoint also needs the time-step endpoint, which stock ComfyUI does not pass. Install our nodes:
 
 ```bash
-ln -s /path/to/H3-Tiny/comfyui ComfyUI/custom_nodes/ComfyUI-H3-Tiny
+ln -s /path/to/MiniMax-H3-Tiny/comfyui ComfyUI/custom_nodes/ComfyUI-MiniMax-H3-Tiny
 ```
 
 Then load the file with **H3-Tiny Few-Step Loader** instead of Load Diffusion Model, and take the sigmas from

@@ -1,6 +1,6 @@
 """ComfyUI nodes for the H3-Tiny few-step checkpoints.
 
-Install: link or copy this folder to ``ComfyUI/custom_nodes/ComfyUI-H3-Tiny``. The full-step H3-Tiny checkpoints need
+Install: link or copy this folder to ``ComfyUI/custom_nodes/ComfyUI-MiniMax-H3-Tiny``. The full-step H3-Tiny checkpoints need
 none of this; they load with the stock "Load Diffusion Model" node.
 
 A few-step student predicts the average velocity over ``[t, r]``, where r is the next point of its step grid, and its
