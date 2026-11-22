@@ -184,6 +184,23 @@ python -m pytest tests/test_prune.py                # pruning math, CPU, no weig
 python tests/smoke_pipeline.py /tmp/h3tiny-smoke    # tiny random model through both pruning scripts, CPU
 ```
 
+## Citation
+
+```bibtex
+@misc{h3tiny2026,
+  title        = {H3-Tiny: Structured Pruning of MiniMax H3},
+  author       = {Fu, Haoshuai and Chen, Bin},
+  year         = {2026},
+  howpublished = {\url{https://github.com/fuyi25/MiniMax-H3-Tiny}},
+  note         = {arXiv coming soon}
+}
+```
+
+## Contact
+
+Questions and bug reports: please [open an issue](https://github.com/fuyi25/MiniMax-H3-Tiny/issues). For anything else,
+email Haoshuai Fu at [fohoo@outlook.com](mailto:fohoo@outlook.com).
+
 ## License
 
 Code: [Apache 2.0](LICENSE). Model weights: [MiniMax H3 Community License Agreement](LICENSE-MiniMax-H3); see

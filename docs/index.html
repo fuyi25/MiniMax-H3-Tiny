@@ -130,6 +130,7 @@ footer { border-top: 1px solid var(--rule); margin-top: 56px; padding-block: 22p
 footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
 footer p { margin: 0; max-width: 82ch; }
 footer a { white-space: nowrap; color: var(--muted); }
+footer .contact { margin-top: 8px; }
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; gap: 26px; }
@@ -156,7 +157,7 @@ footer a { white-space: nowrap; color: var(--muted); }
   <div class="wrap hero" id="overview">
     <div>
       <h1>H3-Tiny: Structured Pruning of MiniMax H3</h1>
-      <div class="authors">Haoshuai Fu · Bin Chen<div class="note">Video and audio generation · 33B → 17B → 14B</div></div>
+      <div class="authors"><a href="https://github.com/fuyi25">Haoshuai Fu</a> · Bin Chen<div class="note">Video and audio generation · 33B → 17B → 14B</div></div>
       <div class="buttons">
         <span class="btn off" title="The paper is in preparation">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
@@ -271,7 +272,10 @@ footer a { white-space: nowrap; color: var(--muted); }
 
 <footer>
   <div class="wrap">
+    <div>
     <p>H3-Tiny is an independent project and is not affiliated with or endorsed by MiniMax. The weights are Model Derivatives of MiniMax H3 under the MiniMax H3 Community License Agreement; MiniMax H3 is licensed under the MiniMax H3 Community License Agreement, Copyright © 2026 MiniMax. All Rights Reserved. Code: Apache 2.0.</p>
+    <p class="contact">Contact: <a href="mailto:fohoo@outlook.com">fohoo@outlook.com</a> · questions and bug reports: <a href="https://github.com/fuyi25/MiniMax-H3-Tiny/issues">GitHub issues</a></p>
+    </div>
     <a href="#top">Back to top ↑</a>
   </div>
 </footer>
