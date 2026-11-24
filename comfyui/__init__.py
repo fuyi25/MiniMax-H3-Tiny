@@ -12,11 +12,15 @@ time embedding is ``emb(t) + emb_r(r - t)`` (``r_time_embedder``). ComfyUI's Min
   shift, conditioning rows ``r = t``.
 * **H3-Tiny Few-Step Sigmas** gives the grid the students were trained on: ``linspace(1, 0, steps + 1)`` at the video
   shift 12. Use it with ``SamplerCustomAdvanced``, the ``euler`` sampler and ``BasicGuider`` (no CFG).
+
+Loading this package also makes the INT8 checkpoints safe on comfy-kitchen's Triton backend (``--enable-triton-backend``),
+see ``patch_triton_int8``.
 """
 
 from __future__ import annotations
 
 import contextlib
+import inspect
 import types
 
 import torch
@@ -30,6 +34,68 @@ import folder_paths
 
 WRAPPER_KEY = "h3tiny_fewstep"
 VIDEO_SHIFT = 12.0
+INT32_MAX = 2**31 - 1
+
+
+def patch_triton_int8():
+    """Split large INT8 calls on comfy-kitchen's Triton backend into row chunks.
+
+    Its INT8 kernels compute element offsets in int32, so a call with rows x width above 2**31 reads out of bounds.
+    A 10 s clip at 1344x768 (about 246k tokens) crosses that in the FFN and gives noisy frames. Each chunk stays below
+    the limit and the result is the same, since activations are quantized per row. Smaller calls are unchanged.
+    """
+    try:
+        from comfy_kitchen.registry import registry
+    except ImportError:
+        return
+    backend = registry._backends.get("triton")
+    if backend is None or getattr(backend, "_h3tiny_chunked", False):
+        return
+
+    def rows_per_call(width):
+        return max(256, (INT32_MAX // width - 512) // 256 * 256)
+
+    def chunked(fn, width_of, run):
+        sig = inspect.signature(fn)
+
+        def wrapper(*args, **kwargs):
+            kw = sig.bind(*args, **kwargs).arguments
+            x = kw["x"]
+            step = rows_per_call(width_of(kw))
+            if x.numel() // x.shape[-1] <= step:
+                return fn(*args, **kwargs)
+            return run(fn, kw, x.reshape(-1, x.shape[-1]), step)
+
+        wrapper.__wrapped__ = fn
+        return wrapper
+
+    def run_linear(fn, kw, x, step):
+        n, res = kw["weight"].shape[0], kw.get("residual")
+        if res is not None and res.numel() != x.shape[0] * n:
+            return fn(**kw)
+        res = None if res is None else res.reshape(-1, n)
+        out = None
+        for i in range(0, x.shape[0], step):
+            part = fn(**{**kw, "x": x[i:i + step], "residual": None if res is None else res[i:i + step]})
+            if out is None:
+                out = part.new_empty((x.shape[0], n))
+            out[i:i + step] = part
+        return out.reshape(*kw["x"].shape[:-1], n)
+
+    def run_quantize(fn, kw, x, step):
+        parts = [fn(**{**kw, "x": x[i:i + step]}) for i in range(0, x.shape[0], step)]
+        q, scale = torch.cat([p[0] for p in parts]), torch.cat([p[1] for p in parts])
+        lead = kw["x"].shape[:-1]
+        scale = scale.reshape(lead) if scale.dim() == 1 else scale.reshape(*lead, scale.shape[-1])
+        return q.reshape(*lead, q.shape[-1]), scale
+
+    if hasattr(backend, "int8_linear"):
+        backend.int8_linear = chunked(
+            backend.int8_linear, lambda kw: max(kw["x"].shape[-1], *kw["weight"].shape), run_linear)
+    for name in ("quantize_int8_rowwise", "quantize_and_rotate_rowwise"):
+        if hasattr(backend, name):
+            setattr(backend, name, chunked(getattr(backend, name), lambda kw: kw["x"].shape[-1], run_quantize))
+    backend._h3tiny_chunked = True
 
 
 class LowRankAdalnProj(nn.Module):
@@ -159,6 +225,8 @@ class H3TinyFewStepSigmas:
         grid = torch.linspace(1.0, 0.0, steps + 1, dtype=torch.float64)
         return ((VIDEO_SHIFT * grid / (1.0 + (VIDEO_SHIFT - 1.0) * grid)).to(torch.float32),)
 
+
+patch_triton_int8()
 
 NODE_CLASS_MAPPINGS = {"H3TinyFewStepLoader": H3TinyFewStepLoader, "H3TinyFewStepSigmas": H3TinyFewStepSigmas}
 NODE_DISPLAY_NAME_MAPPINGS = {"H3TinyFewStepLoader": "H3-Tiny Few-Step Loader",
